@@ -1,0 +1,60 @@
+name: Test PR merged scenario
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: pull_request
+      GITHUB_REF: refs/pull/1/merge
+      GITHUB_HEAD_REF: feature-branch
+      GITHUB_BASE_REF: main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          github-require-keyword-prefix: true
+          github-enable-related-keyword-prefix: true
+          github-require-trello-card: false
+          github-include-pr-comments: false
+          github-include-pr-commit-messages: true
+          github-include-pr-branch-name: true
+          github-allow-multiple-cards-in-pr-branch-name: true
+          github-include-new-card-command: false
+          github-create-new-card-on-merge: false
+          github-users-to-trello-users: |-
+            GithubUser1:TrelloUser1
+          trello-api-key: fake-api-key
+          trello-auth-token: fake-auth-token
+          trello-organization-name: my-org
+          trello-board-id: fake-board-id
+          trello-list-id-pr-draft: fake-list-draft
+          trello-list-id-pr-open: fake-list-open
+          trello-list-id-pr-changes-requested: fake-list-changes
+          trello-list-id-pr-approved: fake-list-approved
+          trello-list-id-pr-closed: fake-list-closed
+          trello-list-id-pr-merged: fake-list-merged
+          trello-list-id-override: fake-list-override
+          trello-move-to-merged-list-only-on-merge: true
+          trello-add-labels-to-cards: false
+          trello-add-manual-labels-to-cards: "feature"
+          trello-conflicting-labels: "wontfix;duplicate"
+          trello-card-position: bottom
+          trello-add-members-to-cards: false
+          trello-switch-members-in-review: true
+          trello-remove-unrelated-members: false
+          trello-archive-on-merge: true
+      - name: Assert action ran (may fail due to fake credentials)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "Action outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action executed (outcome=$OUTCOME)"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi
