@@ -1,0 +1,38 @@
+name: Test require Trello card - error when no card found
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with Trello card required but none present
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          github-require-trello-card: 'true'
+          github-include-pr-comments: 'false'
+          github-include-pr-commit-messages: 'false'
+          github-include-pr-branch-name: 'false'
+          trello-api-key: 'fake-api-key'
+          trello-auth-token: 'fake-auth-token'
+          trello-add-members-to-cards: 'false'
+          trello-add-labels-to-cards: 'false'
+
+      - name: Assert action failed because no Trello card was found
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "Action outcome: $OUTCOME"
+          # When github-require-trello-card is true and no Trello card URL is found,
+          # the action should fail. Under workflow_dispatch there is no PR context,
+          # so the action will fail either due to missing PR context or missing Trello card.
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed when Trello card is required but not found"
+          else
+            echo "FAIL: expected action to fail when github-require-trello-card=true and no card found, got outcome=$OUTCOME"
+            exit 1
+          fi

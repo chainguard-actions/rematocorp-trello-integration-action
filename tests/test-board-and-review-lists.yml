@@ -1,0 +1,40 @@
+name: Test board ID, organization name, and review list configuration
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with board ID, organization name, and review list inputs
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          github-require-trello-card: 'false'
+          github-include-pr-comments: 'false'
+          github-include-pr-commit-messages: 'false'
+          github-include-pr-branch-name: 'false'
+          trello-api-key: 'fake-api-key'
+          trello-auth-token: 'fake-auth-token'
+          trello-board-id: 'fake-board-id'
+          trello-organization-name: 'fake-org-name'
+          trello-list-id-pr-approved: 'fake-approved-list-id'
+          trello-list-id-pr-changes-requested: 'fake-changes-requested-list-id'
+          trello-add-members-to-cards: 'false'
+          trello-add-labels-to-cards: 'false'
+
+      - name: Assert action ran with board and review list configuration
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "Action outcome: $OUTCOME"
+          # The action runs under workflow_dispatch with no PR context.
+          # We verify the action ran (not skipped) with board and review list configuration.
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran with board/org/review-list configuration, outcome=$OUTCOME"

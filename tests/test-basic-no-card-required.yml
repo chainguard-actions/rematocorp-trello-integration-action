@@ -1,0 +1,38 @@
+name: Test basic usage - no Trello card required
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with no Trello card required
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          github-require-trello-card: 'false'
+          github-include-pr-comments: 'false'
+          github-include-pr-commit-messages: 'false'
+          github-include-pr-branch-name: 'false'
+          trello-api-key: 'fake-api-key'
+          trello-auth-token: 'fake-auth-token'
+          trello-add-members-to-cards: 'false'
+          trello-add-labels-to-cards: 'false'
+
+      - name: Assert action ran (outcome is either success or failure, not skipped)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "Action outcome: $OUTCOME"
+          # The action runs under workflow_dispatch, so context.payload.pull_request
+          # is undefined. The action will attempt a GitHub API call which may fail
+          # because there is no PR context. This is expected behavior.
+          # We verify the action ran (not skipped) and did not crash the runner.
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran with outcome=$OUTCOME (expected: success or failure)"

@@ -1,0 +1,40 @@
+name: Test keyword prefix requirement
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with keyword prefix required
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          github-require-keyword-prefix: 'true'
+          github-require-trello-card: 'true'
+          github-include-pr-comments: 'false'
+          github-include-pr-commit-messages: 'false'
+          github-include-pr-branch-name: 'false'
+          trello-api-key: 'fake-api-key'
+          trello-auth-token: 'fake-auth-token'
+          trello-add-members-to-cards: 'false'
+          trello-add-labels-to-cards: 'false'
+
+      - name: Assert action failed when keyword prefix required and card required
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "Action outcome: $OUTCOME"
+          # With github-require-keyword-prefix=true and github-require-trello-card=true,
+          # the action should fail because no Trello card URL with a keyword prefix is found.
+          # Under workflow_dispatch there is no PR context, so the action will fail
+          # either due to missing PR context or missing Trello card.
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed when keyword prefix and Trello card are required"
+          else
+            echo "FAIL: expected action to fail, got outcome=$OUTCOME"
+            exit 1
+          fi

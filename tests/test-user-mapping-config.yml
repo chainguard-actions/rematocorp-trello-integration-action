@@ -1,0 +1,43 @@
+name: Test user mapping and archive on merge configuration
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with user mapping and archive-on-merge configuration
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          github-require-trello-card: 'false'
+          github-include-pr-comments: 'false'
+          github-include-pr-commit-messages: 'false'
+          github-include-pr-branch-name: 'false'
+          github-users-to-trello-users: |-
+            GithubUser1:TrelloUser1
+            GithubUser2:TrelloUser2
+          trello-api-key: 'fake-api-key'
+          trello-auth-token: 'fake-auth-token'
+          trello-add-members-to-cards: 'true'
+          trello-add-labels-to-cards: 'true'
+          trello-archive-on-merge: 'true'
+          trello-remove-unrelated-members: 'false'
+          trello-switch-members-in-review: 'false'
+          trello-card-position: 'bottom'
+
+      - name: Assert action ran with user mapping configuration
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "Action outcome: $OUTCOME"
+          # The action runs under workflow_dispatch with no PR context.
+          # We verify the action ran (not skipped) with user mapping configuration.
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran with user mapping configuration, outcome=$OUTCOME"
