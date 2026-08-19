@@ -2,95 +2,95 @@ author: Remato
 name: Trello Card & GitHub PR Integration
 description: Integrate GitHub pull requests with Trello cards
 branding:
-  color: gray-dark
-  icon: link
+    color: gray-dark
+    icon: link
 inputs:
-  github-token:
-    description: Github token, https://docs.github.com/en/actions/reference/authentication-in-a-workflow.
-    required: true
-  github-require-keyword-prefix:
-    description: When set to true, match only URLs prefixed with “Closes” etc. Just like https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword.
-    default: false
-  github-enable-related-keyword-prefix:
-    description: When set to true, ignore URLs prefixed with "Related".
-    default: false
-  github-require-trello-card:
-    description: Throw an error if no Trello cards can be found in the PR description.
-    default: false
-  github-include-pr-comments:
-    description: Include PR comments when searching for Trello cards.
-    default: true
-  github-include-pr-commit-messages:
-    description: Include PR commit messages when searching for Trello cards. If card ID is found, it automatically comments card URL to the PR.
-    default: false
-  github-include-pr-branch-name:
-    description: Include PR branch name when searching for Trello cards (e.g. "1234-card-title"). If card ID is found, it automatically comments card URL to the PR.
-    default: false
-  github-allow-multiple-cards-in-pr-branch-name:
-    description: Allows to reference multiple card short IDs in the branch name (e.g. feature/38-39-40-foo-bar). Option github-include-pr-branch-name needs to be true.
-    default: false
-  github-include-new-card-command:
-    description: Creates a new Trello card from PR details if "/new-trello-card" is written in the PR description. Replaces "/new-trello-card" with the card link.
-    default: false
-  github-create-new-card-on-merge:
-    description: Creates a new Trello card from PR details if no card is linked and the PR is merged. Adds card link to the PR description.
-    default: false
-  github-users-to-trello-users:
-    description: |-
-      Newline-separated list of mapping between Github username and Trello username. Example:
-      github-users-to-trello-users: |-
-        GithubUser1:TrelloUser1
-        GithubUser2:TrelloUser2
-  trello-api-key:
-    description: Trello API key, visit https://trello.com/app-key for key.
-    required: true
-  trello-auth-token:
-    description: Trello auth token, visit https://trello.com/app-key then click generate a token.
-    required: true
-  trello-organization-name:
-    description: Your organization name to avoid assigning cards to outside members. Edit your workspace details and look for the short name.
-  trello-board-id:
-    description: Trello board ID where to move the cards.
-  trello-list-id-pr-draft:
-    description: Trello list ID for draft pull request.
-  trello-list-id-pr-open:
-    description: Trello list ID for open pull request.
-  trello-list-id-pr-changes-requested:
-    description: Trello list ID for a pull request which has at least one review requesting for changes.
-  trello-list-id-pr-approved:
-    description: Trello list ID for a pull request which has at least one approve and no reviews requesting for changes.
-  trello-list-id-pr-closed:
-    description: Trello list ID for closed pull request. If trello-list-id-pr-merged is set and card is merged, then the card will be moved to merged list.
-  trello-list-id-pr-merged:
-    description: Trello list ID for merged pull request. If trello-archive-on-merge is set to true, the card is archived instead of moving to this list.
-  trello-list-id-override:
-    description: Trello list ID where to manually move cards. If set, overrides all other list move rules.
-  trello-move-to-merged-list-only-on-merge:
-    description: When set to true, moves to trello-list-id-pr-merged only when the job was triggered by "closed" action.
-    default: false
-  trello-add-labels-to-cards:
-    description: Enable or disable the automatic addition of labels to cards.
-    default: true
-  trello-add-manual-labels-to-cards:
-    description: Add these semicolon-separated labels to the Trello card.
-  trello-conflicting-labels:
-    description: When a card has one of these labels, branch category label is not assigned.
-  trello-card-position:
-    description: Position of the card after being moved to a list. Can be "top" or "bottom".
-    default: 'top'
-  trello-add-members-to-cards:
-    description: Adds PR author, contributors and assignees to the Trello card.
-    default: true
-  trello-switch-members-in-review:
-    description: Replaces Trello card members with PR reviewers when PR is opened. It reassigns the PR author, contributors and assignees when the card is moved away from trello-list-id-pr-open.
-    default: false
-  trello-remove-unrelated-members:
-    description: Removes card members who are not authors or assignees of the PR.
-    default: true
-  trello-archive-on-merge:
-    description: Archives Trello cards when PR is merged.
-    default: false
+    github-token:
+        description: Github token, https://docs.github.com/en/actions/reference/authentication-in-a-workflow.
+        required: true
+    github-require-keyword-prefix:
+        description: When set to true, match only URLs prefixed with “Closes” etc. Just like https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword.
+        default: false
+    github-enable-related-keyword-prefix:
+        description: When set to true, ignore URLs prefixed with "Related".
+        default: false
+    github-require-trello-card:
+        description: Throw an error if no Trello cards can be found in the PR description.
+        default: false
+    github-include-pr-comments:
+        description: Include PR comments when searching for Trello cards.
+        default: true
+    github-include-pr-commit-messages:
+        description: Include PR commit messages when searching for Trello cards. If card ID is found, it automatically comments card URL to the PR.
+        default: false
+    github-include-pr-branch-name:
+        description: Include PR branch name when searching for Trello cards (e.g. "1234-card-title"). If card ID is found, it automatically comments card URL to the PR.
+        default: false
+    github-allow-multiple-cards-in-pr-branch-name:
+        description: Allows to reference multiple card short IDs in the branch name (e.g. feature/38-39-40-foo-bar). Option github-include-pr-branch-name needs to be true.
+        default: false
+    github-include-new-card-command:
+        description: Creates a new Trello card from PR details if "/new-trello-card" is written in the PR description. Replaces "/new-trello-card" with the card link.
+        default: false
+    github-create-new-card-on-merge:
+        description: Creates a new Trello card from PR details if no card is linked and the PR is merged. Adds card link to the PR description.
+        default: false
+    github-users-to-trello-users:
+        description: |-
+            Newline-separated list of mapping between Github username and Trello username. Example:
+            github-users-to-trello-users: |-
+              GithubUser1:TrelloUser1
+              GithubUser2:TrelloUser2
+    trello-api-key:
+        description: Trello API key, visit https://trello.com/app-key for key.
+        required: true
+    trello-auth-token:
+        description: Trello auth token, visit https://trello.com/app-key then click generate a token.
+        required: true
+    trello-organization-name:
+        description: Your organization name to avoid assigning cards to outside members. Edit your workspace details and look for the short name.
+    trello-board-id:
+        description: Trello board ID where to move the cards.
+    trello-list-id-pr-draft:
+        description: Trello list ID for draft pull request.
+    trello-list-id-pr-open:
+        description: Trello list ID for open pull request.
+    trello-list-id-pr-changes-requested:
+        description: Trello list ID for a pull request which has at least one review requesting for changes.
+    trello-list-id-pr-approved:
+        description: Trello list ID for a pull request which has at least one approve and no reviews requesting for changes.
+    trello-list-id-pr-closed:
+        description: Trello list ID for closed pull request. If trello-list-id-pr-merged is set and card is merged, then the card will be moved to merged list.
+    trello-list-id-pr-merged:
+        description: Trello list ID for merged pull request. If trello-archive-on-merge is set to true, the card is archived instead of moving to this list.
+    trello-list-id-override:
+        description: Trello list ID where to manually move cards. If set, overrides all other list move rules.
+    trello-move-to-merged-list-only-on-merge:
+        description: When set to true, moves to trello-list-id-pr-merged only when the job was triggered by "closed" action.
+        default: false
+    trello-add-labels-to-cards:
+        description: Enable or disable the automatic addition of labels to cards.
+        default: true
+    trello-add-manual-labels-to-cards:
+        description: Add these semicolon-separated labels to the Trello card.
+    trello-conflicting-labels:
+        description: When a card has one of these labels, branch category label is not assigned.
+    trello-card-position:
+        description: Position of the card after being moved to a list. Can be "top" or "bottom".
+        default: 'top'
+    trello-add-members-to-cards:
+        description: Adds PR author, contributors and assignees to the Trello card.
+        default: true
+    trello-switch-members-in-review:
+        description: Replaces Trello card members with PR reviewers when PR is opened. It reassigns the PR author, contributors and assignees when the card is moved away from trello-list-id-pr-open.
+        default: false
+    trello-remove-unrelated-members:
+        description: Removes card members who are not authors or assignees of the PR.
+        default: true
+    trello-archive-on-merge:
+        description: Archives Trello cards when PR is merged.
+        default: false
 runs:
-  using: node20
-  main: 'dist/index.js'
-  pre: chainguard-phonehome.js
+    pre: chainguard-phonehome.js
+    using: node20
+    main: 'dist/index.js'

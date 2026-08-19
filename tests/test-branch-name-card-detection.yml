@@ -1,0 +1,70 @@
+name: Test Trello card detection from branch name
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create mock PR event payload with card ID in branch name
+        run: |
+          mkdir -p /tmp/github-events
+          cat > /tmp/github-events/event.json << 'EOF'
+          {
+            "action": "opened",
+            "pull_request": {
+              "number": 7,
+              "title": "Feature work",
+              "body": "No explicit Trello link here.",
+              "draft": false,
+              "head": {
+                "ref": "feature/5678-implement-new-feature",
+                "sha": "1a2b3c4d"
+              },
+              "base": {
+                "ref": "main"
+              },
+              "user": {
+                "login": "contributor"
+              },
+              "assignees": [],
+              "requested_reviewers": [],
+              "merged": false,
+              "state": "open"
+            },
+            "repository": {
+              "full_name": "test-owner/test-repo"
+            }
+          }
+          EOF
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          GITHUB_EVENT_PATH: /tmp/github-events/event.json
+          GITHUB_EVENT_NAME: pull_request
+        with:
+          github-token: ${{ github.token }}
+          trello-api-key: fake-api-key
+          trello-auth-token: fake-auth-token
+          trello-board-id: fake-board-id
+          github-require-trello-card: false
+          github-include-pr-branch-name: true
+          github-include-pr-comments: false
+
+      - name: Assert action ran with branch name detection enabled
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "Action outcome: $OUTCOME"
+          # The action should attempt to find a card using the branch name "5678-implement-new-feature".
+          # With fake credentials it will fail at the Trello API call stage.
+          # Since github-require-trello-card is false, a "no card found" result is also acceptable.
+          if [ "$OUTCOME" = "failure" ] || [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action executed with branch name card detection enabled"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi

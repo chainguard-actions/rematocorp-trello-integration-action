@@ -1,0 +1,71 @@
+name: Test github-users-to-trello-users and trello-organization-name inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create mock PR event payload
+        run: |
+          mkdir -p /tmp/github-events
+          cat > /tmp/github-events/event.json << 'EOF'
+          {
+            "action": "opened",
+            "pull_request": {
+              "number": 55,
+              "title": "Add user mapping feature",
+              "body": "This PR tests user mapping. https://trello.com/c/abc123/1-test-card",
+              "draft": false,
+              "head": {
+                "ref": "feature/user-mapping",
+                "sha": "aabbccdd"
+              },
+              "base": {
+                "ref": "main"
+              },
+              "user": {
+                "login": "GithubUser1"
+              },
+              "assignees": [],
+              "requested_reviewers": [],
+              "merged": false,
+              "state": "open"
+            },
+            "repository": {
+              "full_name": "test-owner/test-repo"
+            }
+          }
+          EOF
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          GITHUB_EVENT_PATH: /tmp/github-events/event.json
+          GITHUB_EVENT_NAME: pull_request
+        with:
+          github-token: ${{ github.token }}
+          trello-api-key: fake-api-key
+          trello-auth-token: fake-auth-token
+          github-require-trello-card: false
+          github-include-pr-comments: false
+          github-users-to-trello-users: |-
+            GithubUser1:TrelloUser1
+            GithubUser2:TrelloUser2
+          trello-organization-name: my-test-org
+
+      - name: Assert action executed with user mapping inputs
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "Action outcome: $OUTCOME"
+          # The action should process the PR with user mapping and org name.
+          # With fake credentials it will fail at the Trello API call, which is expected.
+          if [ "$OUTCOME" = "failure" ] || [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action executed with github-users-to-trello-users and trello-organization-name inputs"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi

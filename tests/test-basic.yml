@@ -1,4 +1,4 @@
-name: Test PR merged event handling
+name: Test basic usage - invalid credentials error
 on:
   workflow_dispatch:
 jobs:
@@ -18,11 +18,7 @@ jobs:
           github-token: fake-github-token
           trello-api-key: fake-api-key
           trello-auth-token: fake-auth-token
-          trello-list-id-pr-merged: fake-merged-list-id
-          trello-list-id-pr-closed: fake-closed-list-id
-          trello-archive-on-merge: 'false'
-          trello-move-to-merged-list-only-on-merge: 'true'
-      - name: Assert action ran and failed with credential error
+      - name: Assert action ran and failed with credential error (not a config error)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |

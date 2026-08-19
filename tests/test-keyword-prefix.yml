@@ -1,0 +1,70 @@
+name: Test keyword prefix requirement
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create mock PR event payload with bare Trello URL (no keyword prefix)
+        run: |
+          mkdir -p /tmp/github-events
+          cat > /tmp/github-events/event.json << 'EOF'
+          {
+            "action": "opened",
+            "pull_request": {
+              "number": 15,
+              "title": "Refactor module",
+              "body": "See https://trello.com/c/xyz789/2-some-card for context.",
+              "draft": false,
+              "head": {
+                "ref": "refactor/module",
+                "sha": "aabbccdd"
+              },
+              "base": {
+                "ref": "main"
+              },
+              "user": {
+                "login": "refactorer"
+              },
+              "assignees": [],
+              "requested_reviewers": [],
+              "merged": false,
+              "state": "open"
+            },
+            "repository": {
+              "full_name": "test-owner/test-repo"
+            }
+          }
+          EOF
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          GITHUB_EVENT_PATH: /tmp/github-events/event.json
+          GITHUB_EVENT_NAME: pull_request
+        with:
+          github-token: ${{ github.token }}
+          trello-api-key: fake-api-key
+          trello-auth-token: fake-auth-token
+          github-require-trello-card: true
+          github-require-keyword-prefix: true
+          github-include-pr-comments: false
+          github-include-pr-branch-name: false
+
+      - name: Assert action failed because bare URL without keyword prefix is ignored
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "Action outcome: $OUTCOME"
+          # When github-require-keyword-prefix=true, a bare Trello URL without
+          # a keyword like "Closes" should NOT be matched.
+          # Combined with github-require-trello-card=true, this should cause a failure.
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed — bare URL without keyword prefix was ignored"
+          else
+            echo "FAIL: expected failure (bare URL should be ignored with keyword-prefix=true) but got: $OUTCOME"
+            exit 1
+          fi

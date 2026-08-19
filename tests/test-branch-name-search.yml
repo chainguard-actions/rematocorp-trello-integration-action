@@ -1,13 +1,13 @@
-name: Test PR merged event handling
+name: Test branch name search for Trello card ID
 on:
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      GITHUB_REF: refs/heads/main
+      GITHUB_REF: refs/heads/feature/1234-my-feature
       GITHUB_EVENT_NAME: pull_request
-      GITHUB_HEAD_REF: feature-branch
+      GITHUB_HEAD_REF: feature/1234-my-feature
       GITHUB_BASE_REF: main
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -18,11 +18,9 @@ jobs:
           github-token: fake-github-token
           trello-api-key: fake-api-key
           trello-auth-token: fake-auth-token
-          trello-list-id-pr-merged: fake-merged-list-id
-          trello-list-id-pr-closed: fake-closed-list-id
-          trello-archive-on-merge: 'false'
-          trello-move-to-merged-list-only-on-merge: 'true'
-      - name: Assert action ran and failed with credential error
+          github-include-pr-branch-name: 'true'
+          github-include-pr-comments: 'false'
+      - name: Assert action ran (expected to fail due to invalid credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |

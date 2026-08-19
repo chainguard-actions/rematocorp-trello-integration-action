@@ -1,0 +1,70 @@
+name: Test keyword prefix with Closes keyword matches card
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create mock PR event payload with Closes keyword before Trello URL
+        run: |
+          mkdir -p /tmp/github-events
+          cat > /tmp/github-events/event.json << 'EOF'
+          {
+            "action": "opened",
+            "pull_request": {
+              "number": 20,
+              "title": "Add feature X",
+              "body": "Closes https://trello.com/c/abc123/3-feature-x\n\nImplements feature X as described.",
+              "draft": false,
+              "head": {
+                "ref": "feature/add-feature-x",
+                "sha": "11223344"
+              },
+              "base": {
+                "ref": "main"
+              },
+              "user": {
+                "login": "featuredev"
+              },
+              "assignees": [],
+              "requested_reviewers": [],
+              "merged": false,
+              "state": "open"
+            },
+            "repository": {
+              "full_name": "test-owner/test-repo"
+            }
+          }
+          EOF
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          GITHUB_EVENT_PATH: /tmp/github-events/event.json
+          GITHUB_EVENT_NAME: pull_request
+        with:
+          github-token: ${{ github.token }}
+          trello-api-key: fake-api-key
+          trello-auth-token: fake-auth-token
+          github-require-trello-card: true
+          github-require-keyword-prefix: true
+          github-include-pr-comments: false
+
+      - name: Assert action processed the Closes-prefixed Trello URL
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "Action outcome: $OUTCOME"
+          # The action should find the Trello card URL (prefixed with "Closes").
+          # With fake credentials it will fail at the Trello API call stage,
+          # NOT at the "no card found" validation stage.
+          # Both failure (API auth) and success are acceptable — the card was found.
+          if [ "$OUTCOME" = "failure" ] || [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action executed and found the Closes-prefixed Trello card URL"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi

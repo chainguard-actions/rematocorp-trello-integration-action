@@ -1,0 +1,70 @@
+name: Test Related keyword prefix is ignored when enabled
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create mock PR event payload with Related-prefixed Trello URL
+        run: |
+          mkdir -p /tmp/github-events
+          cat > /tmp/github-events/event.json << 'EOF'
+          {
+            "action": "opened",
+            "pull_request": {
+              "number": 33,
+              "title": "Related work",
+              "body": "Related https://trello.com/c/related1/6-related-card\n\nThis is related but not closing the card.",
+              "draft": false,
+              "head": {
+                "ref": "feature/related-work",
+                "sha": "55667788"
+              },
+              "base": {
+                "ref": "main"
+              },
+              "user": {
+                "login": "relateddev"
+              },
+              "assignees": [],
+              "requested_reviewers": [],
+              "merged": false,
+              "state": "open"
+            },
+            "repository": {
+              "full_name": "test-owner/test-repo"
+            }
+          }
+          EOF
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          GITHUB_EVENT_PATH: /tmp/github-events/event.json
+          GITHUB_EVENT_NAME: pull_request
+        with:
+          github-token: ${{ github.token }}
+          trello-api-key: fake-api-key
+          trello-auth-token: fake-auth-token
+          github-require-trello-card: true
+          github-enable-related-keyword-prefix: true
+          github-include-pr-comments: false
+          github-include-pr-branch-name: false
+
+      - name: Assert action failed because Related-prefixed URL was ignored
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "Action outcome: $OUTCOME"
+          # When github-enable-related-keyword-prefix=true, URLs prefixed with "Related"
+          # should be ignored. Combined with github-require-trello-card=true,
+          # this should cause a failure since no valid card is found.
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed — Related-prefixed URL was ignored"
+          else
+            echo "FAIL: expected failure (Related URL should be ignored) but got: $OUTCOME"
+            exit 1
+          fi
