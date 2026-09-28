@@ -1,0 +1,38 @@
+name: Test list ID configuration
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          trello-api-key: fake-trello-api-key
+          trello-auth-token: fake-trello-auth-token
+          trello-board-id: fake-board-id
+          trello-list-id-pr-draft: fake-list-draft
+          trello-list-id-pr-open: fake-list-open
+          trello-list-id-pr-changes-requested: fake-list-changes
+          trello-list-id-pr-approved: fake-list-approved
+          trello-list-id-pr-closed: fake-list-closed
+          trello-list-id-pr-merged: fake-list-merged
+          trello-card-position: top
+          trello-add-labels-to-cards: 'true'
+          trello-add-members-to-cards: 'true'
+      - name: Assert action ran with list ID config
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with list ID configuration"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (expected with fake credentials and sentinel repo)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

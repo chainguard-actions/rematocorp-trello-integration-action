@@ -1,0 +1,33 @@
+{
+	"name": "@remato/trello-integration-action",
+	"version": "10.1.1",
+	"license": "MIT",
+	"description": "GitHub Action to integrate Github pull requests with Trello cards",
+	"main": "dist/index.js",
+	"engines": {
+		"node": ">=24.0.0"
+	},
+	"scripts": {
+		"build": "esbuild src/index.ts --bundle --platform=node --target=node24 --outfile=dist/index.js",
+		"test": "vitest run",
+		"prettier": "prettier --list-different \"**/*.ts\"",
+		"lint": "oxlint",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@actions/core": "^3.0.1",
+		"@actions/github": "^9.1.1",
+		"axios": "^1.17.0"
+	},
+	"devDependencies": {
+		"@remato/prettier-config": "^1.1.0",
+		"@types/node": "^25.9.3",
+		"@vitest/coverage-v8": "^4.1.6",
+		"esbuild": "^0.28.1",
+		"oxlint": "^1.68.0",
+		"prettier": "^3.8.4",
+		"typescript": "^6.0.3",
+		"vitest": "^4.1.8"
+	},
+	"prettier": "@remato/prettier-config"
+}

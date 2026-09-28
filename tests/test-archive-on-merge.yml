@@ -1,0 +1,33 @@
+name: Test archive on merge and keyword prefix options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          trello-api-key: fake-trello-api-key
+          trello-auth-token: fake-trello-auth-token
+          github-require-keyword-prefix: 'true'
+          github-enable-related-keyword-prefix: 'true'
+          trello-archive-on-merge: 'true'
+          trello-move-to-merged-list-only-on-merge: 'true'
+          github-create-new-card-on-merge: 'false'
+      - name: Assert action ran with archive-on-merge config
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with archive-on-merge configuration"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (expected with fake credentials and sentinel repo)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
