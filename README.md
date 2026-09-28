@@ -8,6 +8,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
+| v10.1.1 | [`v10.1.1`](https://github.com/chainguard-actions/rematocorp-trello-integration-action/tree/v10.1.1) | [`a5d3491`](https://github.com/rematocorp/trello-integration-action/commit/a5d34918d5bf592a8ef7a1d0ce432cd26c77c8c9) |
 | v9.11.0 | [`v9.11.0`](https://github.com/chainguard-actions/rematocorp-trello-integration-action/tree/v9.11.0) | [`81460d9`](https://github.com/rematocorp/trello-integration-action/commit/81460d9de1a888c213bdab0ed1f795e1d6b75d00) |
 | v9.11.1 | [`v9.11.1`](https://github.com/chainguard-actions/rematocorp-trello-integration-action/tree/v9.11.1) | [`c01a570`](https://github.com/rematocorp/trello-integration-action/commit/c01a570d2ffa69b3c5126e16664cfb328090469d) |
 
